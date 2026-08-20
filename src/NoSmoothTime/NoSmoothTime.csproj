@@ -2,17 +2,21 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>true</ImplicitUsings>
+
         <AssemblyName>NoSmoothTime</AssemblyName>
+        <RootNamespace>NoSmoothTime</RootNamespace>
+        <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277</MSBuildWarningsAsMessages>
+
         <Product>NoSmoothTime</Product>
         <Version>1.1.0</Version>
-        <LangVersion>latest</LangVersion>
+
         <RestoreAdditionalProjectSources>
             https://api.nuget.org/v3/index.json;
             https://nuget.bepinex.dev/v3/index.json;
             https://nuget.samboy.dev/v3/index.json
         </RestoreAdditionalProjectSources>
-        <RootNamespace>NoSmoothTime</RootNamespace>
-        <ImplicitUsings>true</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,23 +28,18 @@
     </ItemGroup>
 
     <Target Name="CheckGameAssembly" BeforeTargets="BeforeBuild">
-        <Error Condition="!Exists('$(MSBuildThisFileDirectory)..\..\lib\Assembly-CSharp.dll')"
-               Text="lib/Assembly-CSharp.dll is missing. Copy it from the game's NuclearOption_Data/Managed/ directory."/>
+        <Error Condition="!Exists('$(GameRefPath)/Assembly-CSharp.dll')"
+               Text="Assembly-CSharp.dll not found in '$(GameRefPath)'."/>
     </Target>
 
     <ItemGroup>
-        <Reference Include="Assembly-CSharp">
-            <HintPath>$(MSBuildThisFileDirectory)..\..\lib\Assembly-CSharp.dll</HintPath>
+        <Reference Include="$(GameRefPath)/Assembly-CSharp*.dll">
             <Private>false</Private>
         </Reference>
     </ItemGroup>
-    
-    <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(NuclearOptionDir)' != ''">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(NuclearOptionDir)\BepInEx\plugins\$(AssemblyName)"/>
-        <Message Importance="high" Text="Deployed $(AssemblyName).dll -> $(NuclearOptionDir)\BepInEx\plugins\$(AssemblyName)"/>
-    </Target>
 
-    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
-    </ItemGroup>
+    <Target Name="Deploy" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GamePluginsPath)/$(AssemblyName)"/>
+        <Message Importance="high" Text="Deployed $(AssemblyName).dll -> $(GamePluginsPath)/$(AssemblyName)"/>
+    </Target>
 </Project>
