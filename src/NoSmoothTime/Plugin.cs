@@ -10,17 +10,23 @@ namespace NoSmoothTime;
 internal sealed class Plugin : BaseUnityPlugin
 {
     public static ConfigEntry<bool> Enabled { get; private set; }
+    public static ConfigEntry<float> MinTimeFactor { get; private set; }
 
-    private static ManualLogSource _logger;
     private Harmony _harmony;
 
     private void Awake()
     {
-        _logger = Logger;
-
         Enabled = Config.Bind(
             "General", "Enabled", true,
             "Master switch. When off, the daylight cycle keeps its stock once-per-second lighting update."
+        );
+
+        MinTimeFactor = Config.Bind(
+            "General", "MinTimeFactor", 10f,
+            new ConfigDescription(
+                "Smoothing only applies when the mission's time factor is at least this value.",
+                new AcceptableValueList<float>(0f, 0.5f, 1f, 10f, 30f, 60f)
+            )
         );
 
         try
@@ -30,11 +36,11 @@ internal sealed class Plugin : BaseUnityPlugin
         }
         catch (Exception e)
         {
-            _logger.LogError($"Failed to patch LevelInfo.UpdateTimeOfDayLighting: {e}");
+            Logger.LogError($"Failed to patch LevelInfo.UpdateTimeOfDayLighting: {e}");
             return;
         }
 
-        _logger.LogInfo(
+        Logger.LogInfo(
             $"{MyPluginInfo.PLUGIN_NAME} {MyPluginInfo.PLUGIN_VERSION} is loaded."
         );
     }
