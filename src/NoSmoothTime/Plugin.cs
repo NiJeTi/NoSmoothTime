@@ -49,7 +49,7 @@ internal sealed class Plugin : BaseUnityPlugin
         );
 
         NightMultiplier = Config.Bind(
-            SectionNightSkip, "Multiplier", 8f,
+            SectionNightSkip, "Multiplier", 12f,
             new ConfigDescription(
                 "How much faster the clock runs at night, relative to the mission's own time factor.",
                 new AcceptableValueRange<float>(1f, 100f)
